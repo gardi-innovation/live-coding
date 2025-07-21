@@ -54,6 +54,14 @@ SynthDef.new(\pulseTest, {
 
 w = Synth.new(\pulseTest);
 
+w.set(\width, 0.25);
+w.set(\fund, 120);
+w.set(\maxPartial, 24);
+w.set(\ampHz, 0.5);
+w.free;
+
+x = Synth.new(\pulseTest, \ampHz, 3.3, \fund, 48, \maxPartial, 4, \width, 0.15]);
+
 
 
 
