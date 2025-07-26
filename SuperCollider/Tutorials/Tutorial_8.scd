@@ -158,6 +158,88 @@ z.free;
 
 // Bufread
 
+(
+SynthDef.new(\bufrd_test, {
+	arg amp=1, out=0, buf, start, end;
+	var sig, ptr;
+	ptr = Line.ar(start, end, BufDur.kr(buf), doneAction:2);
+	sig = BufRd.ar(2, buf, ptr);
+	sig = sig * amp;
+	Out.ar(out, sig);
+}).add;
+)
+
+// Forward
+Synth.new(\bufrd_test, [\buf, ~b2.bufnum, \start, 0, \end, ~b2.numFrames-1]);
+// Backward
+~r = ~b2.numFrames-1;
+Synth.new(\bufrd_test, [\buf, ~b2.bufnum, \start, ~r, \end, 0]);
+
+// Line is not capable of looping
+(
+SynthDef.new(\bufrd_loop, {
+	arg amp=1, out=0, buf, start, end, rate=1;
+	var sig, ptr;
+	ptr = Phasor.ar(0, BufRateScale.kr(buf)*rate, start, end);
+	sig = BufRd.ar(2, buf, ptr);
+	sig = sig * amp;
+	Out.ar(out, sig);
+}).add;
+)
+
+x = Synth.new(\bufrd_loop, [\buf, ~b2.bufnum, \start, 0, \end, ~b2.numFrames-1]);
+x.set(\start, ~b2.numFrames/8, \end, ~b2.numFrames-1000);
+x.set(\start, 2000, \end, 26000);
+x.set(\rate, 12.midiratio);
+x.free;
+
+//SineOsc
+(
+SynthDef.new(\bufrd_sine, {
+	arg amp=1, out=0, buf, start, end, freq=1;
+	var sig, ptr;
+	ptr = SinOsc.ar(freq, 3pi/2).range(start,end);
+	sig = BufRd.ar(2, buf, ptr);
+	sig = sig * amp;
+	Out.ar(out, sig);
+}).add;
+)
+
+x = Synth.new(\bufrd_sine, [\buf, ~b2.bufnum, \start, 0, \end, ~b2.numFrames-1, \freq, 1.2]);
+x.free;
+
+//Noise
+(
+SynthDef.new(\bufrd_noise, {
+	arg amp=1, out=0, buf, start, end, freq=1;
+	var sig, ptr;
+	ptr = LFDNoise1.ar(freq).range(start,end);
+	sig = BufRd.ar(2, buf, ptr);
+	sig = sig * amp;
+	Out.ar(out, sig);
+}).add;
+)
+
+x = Synth.new(\bufrd_noise, [\buf, ~b2.bufnum, \start, 0, \end, ~b2.numFrames-1, \freq, 33.3]);
+x.free;
+
+//Group
+
+g = Group.new;
+x = Synth.new(\bufrd_noise, [\buf, ~b0.bufnum, \start, 0, \end, ~b0.numFrames-1, \freq, 2.5, \amp, 0.5], g);
+y = Synth.new(\bufrd_noise, [\buf, ~b1.bufnum, \start, 0, \end, ~b1.numFrames-1, \freq, 3.5, \amp, 0.5], g);
+z = Synth.new(\bufrd_noise, [\buf, ~b2.bufnum, \start, 0, \end, ~b2.numFrames-1, \freq, 2.7, \amp, 0.5], g);
+w = Synth.new(\bufrd_noise, [\buf, ~b4.bufnum, \start, 0, \end, ~b4.numFrames-1, \freq, 3.3, \amp, 0.2], g);
+
+g.set(\freq, 3);
+
+s.freeAll;
+
+
+
+
+
+
 
 
 
